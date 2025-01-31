@@ -1,13 +1,172 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8">
-  <title>FrontendProjetonovo</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Cadastros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 600px;
+        }
+        .container h2 {
+            text-align: center;
+        }
+        .container button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
+        .actions button {
+            background-color: #ff5722;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <app-root></app-root>
+
+    <div class="container">
+        <h2>Gestão de Cadastros</h2>
+        <button onclick="openForm()">Adicionar Cadastro</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Senha</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="user-table">
+                <!-- Aqui serão inseridos os dados dos usuários -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Formulário de Cadastro -->
+    <div id="user-form" style="display: none;">
+        <div class="container">
+            <h2>Adicionar / Editar Cadastro</h2>
+            <form onsubmit="saveUser(event)">
+                <input type="hidden" id="user-id">
+                <input type="email" id="user-email" placeholder="Email" required>
+                <input type="password" id="user-password" placeholder="Senha" required>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="closeForm()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let users = [];  // Simulação de banco de dados
+        let editIndex = null;
+
+        // Abrir o formulário para adicionar/editar
+        function openForm() {
+            document.getElementById("user-form").style.display = "block";
+        }
+
+        // Fechar o formulário
+        function closeForm() {
+            document.getElementById("user-form").style.display = "none";
+            clearForm();
+        }
+
+        // Limpar o formulário
+        function clearForm() {
+            document.getElementById("user-id").value = "";
+            document.getElementById("user-email").value = "";
+            document.getElementById("user-password").value = "";
+        }
+
+        // Salvar ou editar usuário
+        function saveUser(event) {
+            event.preventDefault();
+            const email = document.getElementById("user-email").value;
+            const password = document.getElementById("user-password").value;
+
+            if (editIndex !== null) {
+                // Editar usuário existente
+                users[editIndex].email = email;
+                users[editIndex].password = password;
+                editIndex = null;
+            } else {
+                // Adicionar novo usuário
+                users.push({ id: users.length + 1, email, password });
+            }
+
+            updateTable();
+            closeForm();
+        }
+
+        // Atualizar a tabela com os usuários
+        function updateTable() {
+            const tableBody = document.getElementById("user-table");
+            tableBody.innerHTML = "";
+            users.forEach((user, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.email}</td>
+                    <td>${user.password}</td>
+                    <td class="actions">
+                        <button onclick="editUser(${index})">Editar</button>
+                        <button onclick="deleteUser(${index})">Deletar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Editar usuário
+        function editUser(index) {
+            const user = users[index];
+            document.getElementById("user-id").value = user.id;
+            document.getElementById("user-email").value = user.email;
+            document.getElementById("user-password").value = user.password;
+            editIndex = index;
+            openForm();
+        }
+
+        // Deletar usuário
+        function deleteUser(index) {
+            if (confirm("Tem certeza que deseja excluir este usuário?")) {
+                users.splice(index, 1);
+                updateTable();
+            }
+        }
+    </script>
 </body>
 </html>
