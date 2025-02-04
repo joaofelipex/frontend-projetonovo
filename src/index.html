@@ -3,168 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Cadastros</title>
+    <title>Sistema de Gestão de Cadastros</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root {
+            --primary-color: #2196F3;
+            --danger-color: #f44336;
+            --success-color: #4CAF50;
+            --background-color: #f5f5f5;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            background-color: #f0f0f0;
+            padding: 0;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: #333;
+        }
+
         .container {
-            background: white;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header {
+            background-color: white;
+            padding: 1rem;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            width: 600px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .container h2 {
-            text-align: center;
-        }
-        .container button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
+
+        .btn {
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-        .container button:hover {
-            background-color: #45a049;
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
         }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
         table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
         }
-        table th, table td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
         }
-        table th {
-            background-color: #f4f4f4;
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
         }
-        .actions button {
-            background-color: #ff5722;
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            border-radius: 4px;
+            color: white;
+            animation: fadeIn 0.3s ease;
+            z-index: 1001;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-box {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h2>Gestão de Cadastros</h2>
-        <button onclick="openForm()">Adicionar Cadastro</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Email</th>
-                    <th>Senha</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="user-table">
-                <!-- Aqui serão inseridos os dados dos usuários -->
-            </tbody>
-        </table>
+        <div class="header">
+            <h1>Sistema de Gestão de Cadastros</h1>
+            <div class="header-actions">
+                <input type="text" id="searchInput" class="search-box" placeholder="Pesquisar...">
+                <button class="btn btn-primary" onclick="openModal()">Novo Cadastro</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Formulário de Cadastro -->
-    <div id="user-form" style="display: none;">
-        <div class="container">
-            <h2>Adicionar / Editar Cadastro</h2>
-            <form onsubmit="saveUser(event)">
-                <input type="hidden" id="user-id">
-                <input type="email" id="user-email" placeholder="Email" required>
-                <input type="password" id="user-password" placeholder="Senha" required>
-                <button type="submit">Salvar</button>
-                <button type="button" onclick="closeForm()">Cancelar</button>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Novo Cadastro</h2>
+            <form id="userForm" onsubmit="saveUser(event)">
+                <input type="hidden" id="userId">
+                
+                <div class="form-group">
+                    <label for="userName">Nome</label>
+                    <input type="text" id="userName" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="userPhone">Telefone</label>
+                    <input type="tel" id="userPhone" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="userStatus">Status</label>
+                    <select id="userStatus" class="form-control">
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                        <option value="Pendente">Pendente</option>
+                    </select>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Cancelar</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
-        let users = [];  // Simulação de banco de dados
-        let editIndex = null;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let editingId = null;
 
-        // Abrir o formulário para adicionar/editar
-        function openForm() {
-            document.getElementById("user-form").style.display = "block";
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // Fechar o formulário
-        function closeForm() {
-            document.getElementById("user-form").style.display = "none";
-            clearForm();
+        function openModal(userId = null) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (userId) {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    editingId = userId;
+                    modalTitle.textContent = 'Editar Cadastro';
+                    document.getElementById('userId').value = user.id;
+                    document.getElementById('userName').value = user.name;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userPhone').value = user.phone;
+                    document.getElementById('userStatus').value = user.status;
+                }
+            } else {
+                editingId = null;
+                modalTitle.textContent = 'Novo Cadastro';
+                document.getElementById('userForm').reset();
+            }
+            
+            modal.style.display = 'block';
         }
 
-        // Limpar o formulário
-        function clearForm() {
-            document.getElementById("user-id").value = "";
-            document.getElementById("user-email").value = "";
-            document.getElementById("user-password").value = "";
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('userForm').reset();
+            editingId = null;
         }
 
-        // Salvar ou editar usuário
         function saveUser(event) {
             event.preventDefault();
-            const email = document.getElementById("user-email").value;
-            const password = document.getElementById("user-password").value;
+            
+            const userData = {
+                id: editingId || Date.now(),
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                phone: document.getElementById('userPhone').value,
+                status: document.getElementById('userStatus').value
+            };
 
-            if (editIndex !== null) {
-                // Editar usuário existente
-                users[editIndex].email = email;
-                users[editIndex].password = password;
-                editIndex = null;
+            if (editingId) {
+                const index = users.findIndex(u => u.id === editingId);
+                users[index] = userData;
+                showToast('Cadastro atualizado com sucesso!', 'success');
             } else {
-                // Adicionar novo usuário
-                users.push({ id: users.length + 1, email, password });
+                users.push(userData);
+                showToast('Cadastro criado com sucesso!', 'success');
             }
 
+            localStorage.setItem('users', JSON.stringify(users));
             updateTable();
-            closeForm();
+            closeModal();
         }
 
-        // Atualizar a tabela com os usuários
-        function updateTable() {
-            const tableBody = document.getElementById("user-table");
-            tableBody.innerHTML = "";
-            users.forEach((user, index) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.email}</td>
-                    <td>${user.password}</td>
-                    <td class="actions">
-                        <button onclick="editUser(${index})">Editar</button>
-                        <button onclick="deleteUser(${index})">Deletar</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Editar usuário
-        function editUser(index) {
-            const user = users[index];
-            document.getElementById("user-id").value = user.id;
-            document.getElementById("user-email").value = user.email;
-            document.getElementById("user-password").value = user.password;
-            editIndex = index;
-            openForm();
-        }
-
-        // Deletar usuário
-        function deleteUser(index) {
-            if (confirm("Tem certeza que deseja excluir este usuário?")) {
-                users.splice(index, 1);
+        function deleteUser(id) {
+            if (confirm('Tem certeza que deseja excluir este cadastro?')) {
+                users = users.filter(user => user.id !== id);
+                localStorage.setItem('users', JSON.stringify(users));
                 updateTable();
+                showToast('Cadastro excluído com sucesso!', 'success');
+            }
+        }
+
+        function updateTable(searchTerm = '') {
+            const tableBody = document.getElementById('userTable');
+            const filteredUsers = users.filter(user => 
+                Object.values(user).some(value => 
+                    String(value).toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            );
+
+            tableBody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.status}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary" onclick="openModal(${user.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteUser(${user.id})">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Pesquisa em tempo real
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            updateTable(e.target.value);
+        });
+
+        // Inicializar tabela
+        updateTable();
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
             }
         }
     </script>
